@@ -1,234 +1,156 @@
-# FundWise - Stock Analysis Chatbot
+# FundWise NLP
 
-FundWise is a comprehensive stock analysis application that provides real-time stock data, financial metrics, and market insights through an intuitive chatbot interface with both Flask API and React frontend.
+FundWise NLP is a financial news analysis system that processes financial news articles and provides insights about stock movements, sentiment analysis, and answers questions about the market.
 
-## Project Overview
+## Features
 
-The system consists of two main components:
+- Process financial news articles
+- Extract sentiment (positive/negative/neutral)
+- Identify mentioned stock symbols
+- Answer questions like "Why is [stock] down today?"
+- Explain stock movements based on recent news
 
-- **Flask API Backend**: Provides endpoints for the chatbot functionality and stock data
-- **React Frontend**: User interface for interacting with the chatbot
+## Components
+
+The system consists of the following main components:
+
+1. **GeminiSummarizer**: Uses Google's Gemini API for advanced NLP capabilities
+2. **MockNLPProcessor**: A fallback solution that doesn't require API keys
+3. **News Processor**: Processes and filters news articles by stock symbol and sentiment
+4. **Chatbot NLP**: Handles user queries about stocks and market movements
+
+## Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/yourusername/fundwise-nlp.git
+cd fundwise-nlp
+
+# Install dependencies
+pip install -r requirements.txt
+
+# Configure API keys (optional)
+cp .env.example .env
+# Edit .env to add your Gemini API key
+```
+
+## Usage
+
+### Basic Demo
+
+```python
+from fundwise.nlp import MockNLPProcessor
+
+# Initialize the NLP processor
+nlp = MockNLPProcessor()
+
+# Process a news article
+article = {
+    'title': 'Tesla Reports Strong Q2 Earnings',
+    'content': 'Tesla Inc. announced better than expected earnings for Q2 2023...',
+    'source': 'Financial Times',
+    'date': '2023-07-20'
+}
+
+# Process the article
+result = nlp.process_article(article)
+print(f"Summary: {result['summary']}")
+print(f"Sentiment: {result['sentiment']}")
+print(f"Related Symbols: {result['related_symbols']}")
+
+# Ask a question about a stock
+answer = nlp.answer_question("Why is TSLA up today?")
+print(f"Answer: {answer}")
+```
+
+### Using Gemini API (Recommended)
+
+```python
+import os
+from fundwise.nlp import GeminiSummarizer
+
+# Initialize with API key
+api_key = os.environ.get("GEMINI_API_KEY")
+nlp = GeminiSummarizer(api_key=api_key)
+
+# Process article and ask questions
+# (same methods as MockNLPProcessor)
+```
 
 ## Project Structure
 
 ```
 fundwise/
-├── api/                   # API functionality
+├── nlp/
 │   ├── __init__.py
-│   ├── routes.py          # API route definitions
-│   ├── stock_api.py       # Stock data API functions
-│   └── chatbot_api.py     # Chatbot API functions
-│
-├── react/                 # React frontend
-│   ├── src/               # React source code
-│   ├── public/            # Public assets
-│   └── package.json       # React dependencies
-│
-├── scraper/               # Web scraping functionality
-│   ├── __init__.py
-│   └── news_parser.py     # Financial news scraper
-│
-├── stock_api/             # Stock data processing
-│   ├── __init__.py
-│   ├── api.py             # Stock API functions
-│   └── stock_details.py   # Stock information
-│
-├── summarizer/            # NLP & Text summarization
-│   ├── __init__.py
-│   ├── gemini_summarizer.py # AI text summarization
-│   ├── news_processor.py    # News NLP processing
-│   └── chatbot_nlp.py       # Chatbot NLP component
-│
-├── templates/             # HTML templates for Flask
-│
-├── chatbot_ui/            # Original UI components
-│
-├── app.py                 # Main Flask application
-├── run_flask_api.py       # Flask API server runner
-├── requirements.txt       # Python dependencies
-└── .env                   # Environment variables (create from .env.example)
+│   ├── gemini_summarizer.py  # Gemini-powered NLP
+│   ├── mock_nlp.py           # No-API fallback
+│   ├── news_processor.py     # News article processing
+│   └── chatbot_nlp.py        # Question answering
+├── tests/
+│   ├── test_nlp.py
+│   └── test_news_processor.py
+├── examples/
+│   ├── basic_demo.py
+│   └── interactive_demo.py
+└── requirements.txt
 ```
 
-## Features
+## Integration
 
-- Real-time stock quotes and financial metrics
-- Company profiles and fundamental data
-- Interactive chat interface for stock queries
-- Financial news scraping and summarization
-- React-based modern UI for the chatbot
-- Flask API backend with multiple endpoints
-- NLP-powered news analysis and question answering
+### Integration with Flask API
 
-## NLP Component
+The NLP components can be easily integrated with a Flask API:
 
-The NLP component of FundWise is responsible for:
+```python
+from flask import Flask, request, jsonify
+from fundwise.nlp import MockNLPProcessor
 
-1. **News Article Processing**
-   - Summarizing financial news articles
-   - Analyzing sentiment (positive/negative/neutral)
-   - Extracting stock symbols mentioned in articles
-   - Categorizing news by relevance to specific stocks
+app = Flask(__name__)
+nlp = MockNLPProcessor()
 
-2. **Stock Movement Explanation**
-   - Analyzing recent news to explain price movements
-   - Correlating news sentiment with stock performance
-   - Providing concise explanations for "Why is [stock] up/down?"
+@app.route('/api/process-article', methods=['POST'])
+def process_article():
+    article = request.json
+    result = nlp.process_article(article)
+    return jsonify(result)
 
-3. **Natural Language Understanding**
-   - Processing user questions about stocks and markets
-   - Identifying intent and extracting relevant entities
-   - Matching questions with appropriate news and data
-   - Generating natural language answers
-
-4. **Chatbot Intelligence**
-   - Understanding financial terminology and context
-   - Maintaining conversation history for context
-   - Providing relevant, accurate financial information
-   - Handling different types of financial queries
-
-## Setup and Installation
-
-### Prerequisites
-
-- Python 3.7+ installed
-- Node.js and npm installed
-- Google Gemini API key
-- Required Python packages (see requirements.txt)
-
-### Step 1: Install Dependencies
-
-First, set up the Python virtual environment and install dependencies:
-
-```bash
-# Create and activate a virtual environment
-python -m venv .venv
-source .venv/bin/activate  # On Windows use: .venv\Scripts\activate
-
-# Install Python dependencies
-pip install -r requirements.txt
+@app.route('/api/ask', methods=['POST'])
+def ask_question():
+    question = request.json.get('question')
+    answer = nlp.answer_question(question)
+    return jsonify({'answer': answer})
 ```
 
-Then install the React dependencies:
+### Integration with React Frontend
 
-```bash
-# Navigate to the React directory
-cd react
+The API endpoints can be consumed by a React frontend:
 
-# Install dependencies
-npm install
+```javascript
+// Example fetch calls
+const processArticle = async (article) => {
+  const response = await fetch('/api/process-article', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(article)
+  });
+  return await response.json();
+};
+
+const askQuestion = async (question) => {
+  const response = await fetch('/api/ask', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ question })
+  });
+  return await response.json();
+};
 ```
-
-### Step 2: Set up API keys
-
-- Copy `.env.example` to `.env`
-- Add your API keys:
-  - `GEMINI_API_KEY` for the Google Gemini model
-  - Other financial API keys as needed
-
-## Running the Application
-
-Start the Flask API server:
-
-```bash
-# From the project root directory
-python run_flask_api.py
-```
-
-This will start the Flask server on http://localhost:5000.
-
-In a separate terminal, start the React development server:
-
-```bash
-# Navigate to the React directory
-cd react
-
-# Start the development server
-npm run dev
-```
-
-This will start the React development server on http://localhost:8080.
-
-Access the chatbot through your web browser at http://localhost:8080
-
-## API Endpoints
-
-### NLP-Related Endpoints
-
-#### Chat Endpoint
-`POST /api/chat`
-
-Request Body:
-```json
-{
-  "message": "Why is AAPL stock down today?"
-}
-```
-
-Response:
-```json
-{
-  "response": "Apple (AAPL) is down 2.3% today following reports of supply chain issues affecting iPhone production...",
-  "timestamp": "2023-11-01T12:34:56.789Z",
-  "request_processed": true,
-  "detected_symbol": "AAPL"
-}
-```
-
-#### Stock News Endpoint
-`GET /api/news/AAPL`
-
-Response:
-```json
-{
-  "symbol": "AAPL",
-  "news_count": 3,
-  "news": [
-    {
-      "title": "Apple faces supply chain challenges",
-      "source": "Market News",
-      "url": "https://example.com/news/apple-supply-chain",
-      "date": "2023-11-01",
-      "summary": "Apple is facing challenges in its supply chain...",
-      "sentiment": "Negative"
-    },
-    ...
-  ],
-  "timestamp": "2023-11-01T12:34:56.789Z"
-}
-```
-
-#### Stock Explanation Endpoint
-`GET /api/explain/AAPL`
-
-Response:
-```json
-{
-  "symbol": "AAPL",
-  "explanation": "Apple's stock is down 2.3% today primarily due to supply chain issues reported in recent news...",
-  "timestamp": "2023-11-01T12:34:56.789Z"
-}
-```
-
-## Troubleshooting
-
-### API Connection Issues
-- Ensure both the Flask API server and React development server are running
-- Check that the Vite proxy configuration is correctly set up in react/vite.config.ts
-- Verify network requests in your browser's developer tools
-
-### NLP Issues
-- Ensure your Gemini API key is valid and set in the environment
-- Check for rate limiting issues with the Gemini API
-- Verify that the news processing system is working correctly
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+MIT
 
-## Acknowledgments
+## Contributing
 
-- Alpha Vantage for financial data
-- Finnhub for stock information
-- Google Gemini for NLP capabilities
-- Flask for the web framework
-- React for the frontend framework
+Contributions are welcome! Please feel free to submit a Pull Request.
