@@ -1,0 +1,315 @@
+[
+  {
+    "title": "NSE hits 22 crore investor accounts, reflecting soaring retail participation",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/nse-hits-22-crore-investor-accounts-reflecting-soaring-retail-participation/articleshow/120208080.cms",
+    "date": "2025-04-12 01:56:24",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [
+        "energy",
+        "banking",
+        "fmcg",
+        "auto",
+        "pharma",
+        "it",
+        "telecom"
+      ],
+      "indices": [
+        "nifty",
+        "nifty 50"
+      ],
+      "economic_terms": []
+    },
+    "sentiment": {
+      "label": "Positive",
+      "score": 0.9,
+      "factors": [
+        "increase",
+        "rise",
+        "up"
+      ]
+    },
+    "summary": "",
+    "downturn_factors": {},
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "US stocks rise over 1% as markets weigh tariff risks, big bank earnings",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/us-stocks-open-lower-as-markets-assess-tariff-risks/articleshow/120209255.cms",
+    "date": "2025-04-12 01:56:22",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [
+        "banking",
+        "auto"
+      ],
+      "indices": [],
+      "economic_terms": [
+        "inflation",
+        "interest rate"
+      ]
+    },
+    "sentiment": {
+      "label": "Positive",
+      "score": 0.8,
+      "factors": [
+        "rise",
+        "up",
+        "gain"
+      ]
+    },
+    "summary": "",
+    "downturn_factors": {},
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "China has considered opening its $520 billion ETF market to Western market makers, sources say",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/china-has-considered-opening-its-520-billion-etf-market-to-western-market-makers-sources-say/articleshow/120209768.cms",
+    "date": "2025-04-12 01:56:19",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [
+        "banking",
+        "auto",
+        "pharma"
+      ],
+      "indices": [],
+      "economic_terms": []
+    },
+    "sentiment": {
+      "label": "Negative",
+      "score": 0.6,
+      "factors": [
+        "decline",
+        "miss",
+        "lower"
+      ]
+    },
+    "summary": "",
+    "downturn_factors": {
+      "regulatory": [
+        "legal"
+      ],
+      "sectoral": [
+        "it"
+      ]
+    },
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "Sebi introduces standardized application format for Specialized Investment Funds",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/sebi-introduces-standardized-application-format-for-specialized-investment-funds/articleshow/120209888.cms",
+    "date": "2025-04-12 01:56:17",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [
+        "banking",
+        "auto",
+        "energy"
+      ],
+      "indices": [],
+      "economic_terms": [
+        "sebi"
+      ]
+    },
+    "sentiment": {
+      "label": "Negative",
+      "score": 0.6,
+      "factors": [
+        "risk",
+        "issue"
+      ]
+    },
+    "summary": "",
+    "downturn_factors": {
+      "regulatory": [
+        "sebi"
+      ],
+      "sectoral": [
+        "it"
+      ]
+    },
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "JPMorgan Chase sees 'considerable turbulence' facing economy as profits rise",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/jpmorgan-chase-sees-considerable-turbulence-facing-economy-as-profits-rise/articleshow/120209988.cms",
+    "date": "2025-04-12 01:56:15",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [
+        "banking",
+        "auto"
+      ],
+      "indices": [],
+      "economic_terms": [
+        "inflation",
+        "fiscal deficit",
+        "interest rate"
+      ]
+    },
+    "sentiment": {
+      "label": "Positive",
+      "score": 0.8,
+      "factors": [
+        "increase",
+        "rise",
+        "up"
+      ]
+    },
+    "summary": "",
+    "downturn_factors": {},
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "US stocks shaky, while falling US dollar, bond prices indicate more fear amid trade war",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/us-stocks-shaky-while-falling-us-dollar-bond-prices-indicate-more-fear-amid-trade-war/articleshow/120210104.cms",
+    "date": "2025-04-12 01:56:12",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [
+        "banking",
+        "fmcg",
+        "auto",
+        "manufacturing"
+      ],
+      "indices": [],
+      "economic_terms": [
+        "inflation",
+        "interest rate"
+      ]
+    },
+    "sentiment": {
+      "label": "Positive",
+      "score": 0.8,
+      "factors": [
+        "rise",
+        "up",
+        "gain"
+      ]
+    },
+    "summary": "",
+    "downturn_factors": {},
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "China hits back! Dollar tanks | D-Street cheers, Nifty adds \u20b97.7 L cr",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/china-hits-back-dollar-tanks-d-street-cheers-nifty-adds-7-7-l-cr/videoshow/120210398.cms",
+    "date": "2025-04-12 01:56:09",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [],
+      "indices": [
+        "nifty"
+      ],
+      "economic_terms": []
+    },
+    "sentiment": {
+      "label": "Neutral",
+      "score": 0.5,
+      "factors": []
+    },
+    "summary": "",
+    "downturn_factors": {},
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "These 5 stocks have PE ratios below Industry average",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/these-5-stocks-have-pe-ratios-below-industry-average/slideshow/120209179.cms",
+    "date": "2025-04-12 01:56:06",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [],
+      "indices": [],
+      "economic_terms": []
+    },
+    "sentiment": {
+      "label": "Neutral",
+      "score": 0.5,
+      "factors": []
+    },
+    "summary": "",
+    "downturn_factors": {},
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "Sebi flags surge in social media stock scams. Here's how to to find registered intermediaries",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/sebi-flags-surge-in-social-media-stock-scams-heres-how-to-to-find-registered-intermediaries/articleshow/120211156.cms",
+    "date": "2025-04-12 01:56:03",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [],
+      "symbols": [],
+      "sectors": [
+        "banking",
+        "auto",
+        "pharma"
+      ],
+      "indices": [],
+      "economic_terms": [
+        "sebi"
+      ]
+    },
+    "sentiment": {
+      "label": "Positive",
+      "score": 0.7,
+      "factors": [
+        "rise",
+        "up",
+        "gain"
+      ]
+    },
+    "summary": "",
+    "downturn_factors": {},
+    "processed_at": "2025-04-12 01:56:44"
+  },
+  {
+    "title": "Stock picks of the week: 5 stocks with consistent score improvement and return potential of more than 27% in 1 year",
+    "url": "https://economictimes.indiatimes.com/markets/stocks/news/stock-picks-of-the-week-5-stocks-with-consistent-score-improvement-and-return-potential-of-more-than-27-in-1-year/articleshow/120214856.cms",
+    "date": "2025-04-12 01:56:00",
+    "source": "Economic Times",
+    "entities": {
+      "companies": [
+        "tcs"
+      ],
+      "symbols": [
+        "TCS"
+      ],
+      "sectors": [
+        "auto"
+      ],
+      "indices": [],
+      "economic_terms": []
+    },
+    "sentiment": {
+      "label": "Negative",
+      "score": 0.6,
+      "factors": [
+        "issue"
+      ]
+    },
+    "summary": "",
+    "downturn_factors": {
+      "sectoral": [
+        "it"
+      ]
+    },
+    "processed_at": "2025-04-12 01:56:44"
+  }
+]

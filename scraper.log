@@ -1,0 +1,118 @@
+2025-04-12 01:55:51,854 - NewsSense - INFO - Initializing NewsSense
+2025-04-12 01:55:51,855 - NLPAnalyzer - INFO - Initializing NLP Analyzer
+2025-04-12 01:55:51,880 - NewsSense - INFO - Refreshing data from sources
+2025-04-12 01:55:51,881 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks
+2025-04-12 01:55:57,381 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks/news
+2025-04-12 01:56:27,024 - NewsScraperIndia - INFO - Scraped 10 articles from Economic Times
+2025-04-12 01:56:27,025 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 01:56:31,165 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/markets/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 01:56:31,167 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 01:56:34,811 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/stocks/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 01:56:34,812 - NewsScraperIndia - INFO - Scraped 0 articles from Moneycontrol
+2025-04-12 01:56:34,812 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/
+2025-04-12 01:56:40,320 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/stock-market/
+2025-04-12 01:56:44,118 - NewsScraperIndia - INFO - Scraped 0 articles from Financial Express
+2025-04-12 01:56:44,119 - NewsScraperIndia - INFO - Scraped a total of 10 articles from all sources
+2025-04-12 01:56:44,129 - NLPAnalyzer - INFO - Updating knowledge base
+2025-04-12 01:56:44,133 - NewsSense - INFO - Data refresh complete. Processed 10 new articles
+2025-04-12 01:56:47,788 - StockScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/india/stockpricequote/search/auto/RELIANCE: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/india/stockpricequote/search/auto/RELIANCE
+2025-04-12 02:56:36,995 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks
+2025-04-12 02:56:40,401 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks/news
+2025-04-12 02:56:58,206 - NewsScraperIndia - INFO - Scraped 7 articles from Economic Times
+2025-04-12 02:56:58,207 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 02:57:01,608 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/markets/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 02:57:01,609 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 02:57:03,717 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/stocks/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 02:57:03,717 - NewsScraperIndia - INFO - Scraped 0 articles from Moneycontrol
+2025-04-12 02:57:03,717 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/
+2025-04-12 02:57:06,012 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/stock-market/
+2025-04-12 02:57:09,128 - NewsScraperIndia - INFO - Scraped 0 articles from Financial Express
+2025-04-12 02:57:09,129 - NewsScraperIndia - INFO - Scraped a total of 7 articles from all sources
+2025-04-12 03:02:37,040 - yfinance - ERROR - 404 Client Error: Not Found for url: https://query2.finance.yahoo.com/v10/finance/quoteSummary/DOWN?.NS&modules=financialData%2CquoteType%2CdefaultKeyStatistics%2CassetProfile%2CsummaryDetail&corsDomain=finance.yahoo.com&formatted=false&symbol=DOWN%3F.NS&crumb=bucVzF.lY%2FI
+2025-04-12 03:02:40,238 - yfinance - ERROR - 
+4 Failed downloads:
+2025-04-12 03:02:40,239 - yfinance - ERROR - ['WHY']: YFPricesMissingError('possibly delisted; no price data found  (period=35d)')
+2025-04-12 03:02:40,240 - yfinance - ERROR - ['TCS', 'IS']: YFPricesMissingError('possibly delisted; no price data found  (period=35d) (Yahoo error = "No data found, symbol may be delisted")')
+2025-04-12 03:02:40,240 - yfinance - ERROR - ['DOWN?.NS']: AttributeError("'NoneType' object has no attribute 'update'")
+2025-04-12 03:02:46,523 - yfinance - ERROR - 
+4 Failed downloads:
+2025-04-12 03:02:46,524 - yfinance - ERROR - ['WHY']: YFPricesMissingError('possibly delisted; no price data found  (period=35d)')
+2025-04-12 03:02:46,525 - yfinance - ERROR - ['TCS', 'IS', 'DOWN?.BO']: YFPricesMissingError('possibly delisted; no price data found  (period=35d) (Yahoo error = "No data found, symbol may be delisted")')
+2025-04-12 03:02:47,735 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks
+2025-04-12 03:02:50,217 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks/news
+2025-04-12 03:03:10,065 - NewsScraperIndia - INFO - Scraped 7 articles from Economic Times
+2025-04-12 03:03:10,066 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:03:11,540 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/markets/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:03:11,541 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:03:14,243 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/stocks/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:03:14,244 - NewsScraperIndia - INFO - Scraped 0 articles from Moneycontrol
+2025-04-12 03:03:14,244 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/
+2025-04-12 03:03:16,591 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/stock-market/
+2025-04-12 03:03:18,555 - NewsScraperIndia - INFO - Scraped 0 articles from Financial Express
+2025-04-12 03:03:18,556 - NewsScraperIndia - INFO - Scraped a total of 7 articles from all sources
+2025-04-12 03:04:02,143 - yfinance - ERROR - 
+1 Failed download:
+2025-04-12 03:04:02,144 - yfinance - ERROR - ['GMDC.NS']: YFPricesMissingError('possibly delisted; no price data found  (period=35d)')
+2025-04-12 03:04:03,061 - yfinance - ERROR - 
+1 Failed download:
+2025-04-12 03:04:03,062 - yfinance - ERROR - ['GMDC.BO']: YFPricesMissingError('possibly delisted; no price data found  (period=35d)')
+2025-04-12 03:04:04,269 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks
+2025-04-12 03:04:06,196 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks/news
+2025-04-12 03:04:25,102 - NewsScraperIndia - INFO - Scraped 7 articles from Economic Times
+2025-04-12 03:04:25,103 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:04:26,862 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/markets/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:04:26,863 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:04:29,482 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/stocks/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:04:29,483 - NewsScraperIndia - INFO - Scraped 0 articles from Moneycontrol
+2025-04-12 03:04:29,484 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/
+2025-04-12 03:04:32,880 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/stock-market/
+2025-04-12 03:04:35,526 - NewsScraperIndia - INFO - Scraped 0 articles from Financial Express
+2025-04-12 03:04:35,526 - NewsScraperIndia - INFO - Scraped a total of 7 articles from all sources
+2025-04-12 03:10:36,533 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks
+2025-04-12 03:10:40,991 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks/news
+2025-04-12 03:10:58,048 - NewsScraperIndia - INFO - Scraped 7 articles from Economic Times
+2025-04-12 03:10:58,048 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:11:00,499 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/markets/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:11:00,500 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:11:02,973 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/stocks/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:11:02,974 - NewsScraperIndia - INFO - Scraped 0 articles from Moneycontrol
+2025-04-12 03:11:02,974 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/
+2025-04-12 03:11:05,914 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/stock-market/
+2025-04-12 03:11:07,770 - NewsScraperIndia - INFO - Scraped 0 articles from Financial Express
+2025-04-12 03:11:07,771 - NewsScraperIndia - INFO - Scraped a total of 7 articles from all sources
+2025-04-12 03:12:09,246 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks
+2025-04-12 03:12:11,108 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks/news
+2025-04-12 03:12:30,413 - NewsScraperIndia - INFO - Scraped 7 articles from Economic Times
+2025-04-12 03:12:30,414 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:12:33,112 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/markets/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:12:33,113 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:12:35,290 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/stocks/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:12:35,291 - NewsScraperIndia - INFO - Scraped 0 articles from Moneycontrol
+2025-04-12 03:12:35,291 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/
+2025-04-12 03:12:38,894 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/stock-market/
+2025-04-12 03:12:41,487 - NewsScraperIndia - INFO - Scraped 0 articles from Financial Express
+2025-04-12 03:12:41,488 - NewsScraperIndia - INFO - Scraped a total of 7 articles from all sources
+2025-04-12 03:14:36,947 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks
+2025-04-12 03:14:39,446 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks/news
+2025-04-12 03:14:58,088 - NewsScraperIndia - INFO - Scraped 7 articles from Economic Times
+2025-04-12 03:14:58,089 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:15:00,451 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/markets/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:15:00,452 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:15:02,802 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/stocks/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:15:02,802 - NewsScraperIndia - INFO - Scraped 0 articles from Moneycontrol
+2025-04-12 03:15:02,803 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/
+2025-04-12 03:15:04,745 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/stock-market/
+2025-04-12 03:15:07,540 - NewsScraperIndia - INFO - Scraped 0 articles from Financial Express
+2025-04-12 03:15:07,540 - NewsScraperIndia - INFO - Scraped a total of 7 articles from all sources
+2025-04-12 03:19:32,986 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks
+2025-04-12 03:19:38,214 - NewsScraperIndia - INFO - Scraping Economic Times: https://economictimes.indiatimes.com/markets/stocks/news
+2025-04-12 03:19:57,703 - NewsScraperIndia - INFO - Scraped 7 articles from Economic Times
+2025-04-12 03:19:57,704 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:20:01,640 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/markets/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/markets/
+2025-04-12 03:20:01,641 - NewsScraperIndia - INFO - Scraping Moneycontrol: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:20:04,101 - NewsScraperIndia - ERROR - Error fetching https://www.moneycontrol.com/news/business/stocks/: 403 Client Error: Forbidden for url: https://www.moneycontrol.com/news/business/stocks/
+2025-04-12 03:20:04,102 - NewsScraperIndia - INFO - Scraped 0 articles from Moneycontrol
+2025-04-12 03:20:04,102 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/
+2025-04-12 03:20:08,163 - NewsScraperIndia - INFO - Scraping Financial Express: https://www.financialexpress.com/market/stock-market/
+2025-04-12 03:20:10,825 - NewsScraperIndia - INFO - Scraped 0 articles from Financial Express
+2025-04-12 03:20:10,825 - NewsScraperIndia - INFO - Scraped a total of 7 articles from all sources
