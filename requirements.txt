@@ -16,4 +16,8 @@ vaderSentiment>=3.3.2
 yake>=0.4.0
 react>=4.3.0
 sqlite-fts4>=1.0.3
-emoji>=2.2.0 
+emoji>=2.2.0
+flask-cors
+numpy
+langchain
+langchain_openai 

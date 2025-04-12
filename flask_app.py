@@ -1,27 +1,71 @@
 """
-Flask Web Application for MyFi NewsSense
-This module provides a web interface for the enhanced NLP system with interactive
-charts, sentiment analysis, and Nifty market data visualization.
+Simplified Flask Web Application for MyFi NewsSense
+This version has minimal dependencies and provides mock data for hackathon demonstration.
 """
 import os
 import json
 import time
-from flask import Flask, request, jsonify, render_template, session
-
-# Import data and NLP modules
-from fundwise.nlp.enhanced_nlp import EnhancedNLPProcessor
-from market_data import get_market_articles
-from nifty_data import get_nifty_news_articles, get_nifty_price_data
-from nifty_chat import generate_answer
+import uuid
+import random
+from datetime import datetime, timedelta
+from flask import Flask, request, jsonify, render_template
+from flask_cors import CORS
 
 # Initialize Flask app
 app = Flask(__name__)
 app.secret_key = os.environ.get('FLASK_SECRET_KEY', 'my-secret-key-for-newssense')
+CORS(app)  # Enable CORS for all routes
 
-# Initialize NLP processor and load data (only once at startup)
-nlp_processor = EnhancedNLPProcessor()
-articles = get_market_articles() + get_nifty_news_articles()
-price_data = get_nifty_price_data()
+# Mock data for the hackathon demo
+mock_articles = [
+    {
+        "title": "Nifty drops 2% as global markets react to interest rate concerns",
+        "source": "Financial Times",
+        "date": (datetime.now() - timedelta(days=1)).strftime("%Y-%m-%d"),
+        "content": "Nifty index dropped 2% today as global markets reacted negatively to central bank announcements regarding potential interest rate increases. Banking and technology sectors were the most affected, with major companies reporting significant losses."
+    },
+    {
+        "title": "SBI Mutual Fund outperforms market with 15% annual growth",
+        "source": "Economic Times",
+        "date": (datetime.now() - timedelta(days=2)).strftime("%Y-%m-%d"),
+        "content": "SBI Mutual Fund has reported impressive 15% annual growth, significantly outperforming the broader market. The fund's strategic investments in energy and healthcare sectors have paid off, despite overall market volatility."
+    },
+    {
+        "title": "HDFC Bank announces acquisition plans, shares surge 3%",
+        "source": "Business Standard",
+        "date": (datetime.now() - timedelta(days=3)).strftime("%Y-%m-%d"),
+        "content": "HDFC Bank shares surged 3% following announcement of strategic acquisition plans. The bank's expansion strategy aims to strengthen its position in the competitive financial services market."
+    },
+    {
+        "title": "ICICI introduces new digital banking features, analysts optimistic",
+        "source": "Financial Express",
+        "date": (datetime.now() - timedelta(days=4)).strftime("%Y-%m-%d"),
+        "content": "ICICI Bank has introduced innovative digital banking features, attracting positive responses from analysts. The new technologies are expected to improve customer experience and operational efficiency."
+    },
+    {
+        "title": "Bank Nifty volatility increases amid sector-wide regulatory changes",
+        "source": "Money Control",
+        "date": (datetime.now() - timedelta(days=5)).strftime("%Y-%m-%d"),
+        "content": "Bank Nifty has shown increased volatility as financial institutions adjust to new regulatory requirements. Analysts expect short-term fluctuations but improved stability in the long term."
+    }
+]
+
+# Mock price data
+mock_price_data = {
+    "NIFTY": generate_price_data(18500, volatility=0.015),
+    "SBI": generate_price_data(550, volatility=0.02, trend=0.005),
+    "HDFC": generate_price_data(1650, volatility=0.01, trend=0.003),
+    "ICICI": generate_price_data(900, volatility=0.018),
+    "BANKNIFTY": generate_price_data(42500, volatility=0.02, trend=-0.002),
+}
+
+def generate_price_data(start_price, days=30, volatility=0.01, trend=0):
+    """Generate mock price data with specified volatility and trend"""
+    prices = [start_price]
+    for _ in range(days - 1):
+        change = prices[-1] * random.uniform(-volatility, volatility) + (prices[-1] * trend)
+        prices.append(max(0.1, prices[-1] + change))  # Ensure price doesn't go too low
+    return prices
 
 @app.route('/')
 def index():
@@ -38,14 +82,75 @@ def ask_question():
         return jsonify({'error': 'No question provided'}), 400
     
     try:
-        # Process the question
-        response = generate_answer(nlp_processor, question, articles, price_data)
+        # Process the question (simplified for hackathon)
+        entity = extract_entity(question)
+        
+        # Generate response based on detected entity and question
+        if "down" in question.lower() or "drop" in question.lower() or "fall" in question.lower():
+            response_text = generate_negative_response(entity)
+            has_graph = True
+        elif "up" in question.lower() or "rise" in question.lower() or "gain" in question.lower() or "growth" in question.lower():
+            response_text = generate_positive_response(entity)
+            has_graph = True
+        elif "compare" in question.lower():
+            response_text = generate_comparison_response(question)
+            has_graph = True
+        else:
+            response_text = generate_general_response(entity)
+            has_graph = random.choice([True, False, True])  # Mostly show graphs
         
         return jsonify({
-            'text': response['text'],
-            'has_graph': 'graph_data' in response,
-            'entity': response.get('entity', 'Market')
+            'text': response_text,
+            'has_graph': has_graph,
+            'entity': entity
         })
+    
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/chat', methods=['POST'])
+def chat():
+    """API endpoint for the chat interface in the frontend"""
+    data = request.json
+    message = data.get('message', '')
+    
+    if not message:
+        return jsonify({'error': 'No message provided'}), 400
+    
+    try:
+        # Process the question (simplified for hackathon)
+        entity = extract_entity(message)
+        
+        # Generate response based on detected entity and question
+        if "down" in message.lower() or "drop" in message.lower() or "fall" in message.lower():
+            response_text = generate_negative_response(entity)
+            has_graph = True
+        elif "up" in message.lower() or "rise" in message.lower() or "gain" in message.lower() or "growth" in message.lower():
+            response_text = generate_positive_response(entity)
+            has_graph = True
+        elif "compare" in message.lower():
+            response_text = generate_comparison_response(message)
+            has_graph = True
+        else:
+            response_text = generate_general_response(entity)
+            has_graph = random.choice([True, False, True])  # Mostly show graphs
+        
+        # Generate chart data if needed
+        chart_data = None
+        if has_graph:
+            chart_data = generate_chart_data(entity, message)
+        
+        result = {
+            'id': str(uuid.uuid4()),
+            'content': response_text,
+            'has_graph': has_graph,
+            'entity': entity
+        }
+        
+        if chart_data:
+            result['chart_data'] = chart_data
+        
+        return jsonify(result)
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -58,16 +163,15 @@ def get_graph_data():
     
     try:
         # Generate response with graph data
-        response = generate_answer(nlp_processor, question, articles, price_data)
+        if not entity:
+            entity = extract_entity(question)
         
-        if 'graph_data' in response and 'graph_json' in response['graph_data']:
-            graph_json = response['graph_data']['graph_json']
+        chart_data = generate_chart_data(entity, question)
+        
             return jsonify({
-                'graph_data': json.loads(graph_json),
-                'entity': response.get('entity', 'Market')
+            'graph_data': chart_data,
+            'entity': entity
             })
-        else:
-            return jsonify({'error': 'No graph data available for this query'}), 404
     
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -90,9 +194,9 @@ def get_entities():
     for entity in entities:
         # Get performance data if available
         performance = "N/A"
-        if price_data and entity in price_data:
-            start_price = price_data[entity][0]
-            end_price = price_data[entity][-1]
+        if entity in mock_price_data:
+            start_price = mock_price_data[entity][0]
+            end_price = mock_price_data[entity][-1]
             percent_change = ((end_price - start_price) / start_price) * 100
             performance = f"{percent_change:.2f}%"
         
@@ -110,7 +214,7 @@ def get_articles():
     entity_filter = request.args.get('entity', None)
     
     filtered_articles = []
-    for article in articles:
+    for article in mock_articles:
         # Include basic article data
         article_data = {
             'title': article['title'],
@@ -127,424 +231,197 @@ def get_articles():
     
     return jsonify({'articles': filtered_articles})
 
-# Create templates directory and basic HTML template
-def create_templates():
-    """Create the templates directory and basic HTML template if they don't exist"""
-    templates_dir = os.path.join(os.path.dirname(__file__), 'templates')
-    if not os.path.exists(templates_dir):
-        os.makedirs(templates_dir)
+@app.route('/api/suggestions', methods=['GET'])
+def get_suggestions():
+    """API endpoint to get suggested questions for the chat interface"""
+    suggestions = [
+        "Why is NIFTY down today?",
+        "How is SBI Mutual Fund performing?",
+        "Compare NIFTY with HDFC AMC",
+        "Explain the banking sector trend",
+        "What are the top financial news today?"
+    ]
+    return jsonify({'suggestions': suggestions})
+
+def extract_entity(question):
+    """Extract the entity from the question"""
+    entities = ["NIFTY", "SBI", "HDFC", "ICICI", "BANKNIFTY"]
+    for entity in entities:
+        if entity.upper() in question.upper():
+            return entity
+    return "NIFTY"  # Default to NIFTY if no entity found
+
+def generate_negative_response(entity):
+    """Generate a response for negative market movement"""
+    responses = [
+        f"{entity} has experienced a downturn primarily due to global market uncertainty and foreign institutional investor (FII) outflows. Recent economic data indicating slower growth has triggered risk-off sentiment.",
+        f"The decline in {entity} can be attributed to multiple factors: rising inflation concerns, recent regulatory developments, and profit-taking after the previous rally. Technical indicators suggest oversold conditions.",
+        f"{entity} is down as investors react to disappointing quarterly results from key constituents. Additionally, concerns about interest rate hikes have pressured valuations across the sector.",
+        f"The {entity} downturn reflects broader market anxiety about fiscal policies and international trade tensions. However, domestic institutional buying provides some support at lower levels."
+    ]
+    return random.choice(responses)
+
+def generate_positive_response(entity):
+    """Generate a response for positive market movement"""
+    responses = [
+        f"{entity} has shown strong upward momentum driven by robust institutional buying and positive economic indicators. Corporate earnings have largely beaten expectations, supporting the rally.",
+        f"The impressive performance of {entity} can be attributed to favorable policy announcements, improved liquidity conditions, and renewed foreign investor interest in Indian markets.",
+        f"{entity} is trending higher as recent data points to economic resilience and controlled inflation. The outlook remains positive with strong technical support levels.",
+        f"The uptrend in {entity} reflects increasing investor confidence in the growth prospects. Sector rotation into these assets suggests a sustainable medium-term rally."
+    ]
+    return random.choice(responses)
+
+def generate_comparison_response(question):
+    """Generate a response comparing entities"""
+    entities = ["NIFTY", "SBI", "HDFC", "ICICI", "BANKNIFTY"]
+    mentioned = []
     
-    index_html_path = os.path.join(templates_dir, 'index.html')
-    if not os.path.exists(index_html_path):
-        with open(index_html_path, 'w', encoding='utf-8') as f:
-            f.write('''
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MyFi NewsSense - Why is my Nifty down?</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f8f9fa;
-        }
-        .chat-container {
-            height: 400px;
-            overflow-y: auto;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            padding: 1rem;
-            background-color: white;
-        }
-        .user-message {
-            background-color: #f1f8ff;
-            padding: 0.5rem 1rem;
-            border-radius: 1rem;
-            margin-bottom: 0.5rem;
-            max-width: 80%;
-            align-self: flex-end;
-            margin-left: auto;
-        }
-        .assistant-message {
-            background-color: #efffef;
-            padding: 0.5rem 1rem;
-            border-radius: 1rem;
-            margin-bottom: 0.5rem;
-            max-width: 80%;
-        }
-        .chart-container {
-            height: 400px;
-            border: 1px solid #dee2e6;
-            border-radius: 0.375rem;
-            background-color: white;
-        }
-        .entity-card {
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-        .entity-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-        }
-        .news-item {
-            border-left: 4px solid #28a745;
-            padding-left: 1rem;
-            margin-bottom: 1rem;
-        }
-    </style>
-</head>
-<body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
-        <div class="container">
-            <a class="navbar-brand" href="#">
-                📊 MyFi NewsSense
-            </a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="#" id="showHelp">Help</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <div class="container mt-4">
-        <div class="row">
-            <div class="col-md-8">
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Chat with MyFi NewsSense 💬</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chat-container d-flex flex-column" id="chatContainer">
-                            <div class="assistant-message">
-                                👋 Hello! I'm MyFi NewsSense. Ask me about Nifty, mutual funds, or market trends. Try asking "Why is Nifty down today?" or "How is SBI Mutual Fund performing?"
-                            </div>
-                        </div>
-                        <div class="mt-3">
-                            <div class="input-group">
-                                <input type="text" class="form-control" id="questionInput" 
-                                    placeholder="Ask a question (e.g., Why is my Nifty down?)" 
-                                    aria-label="Question" aria-describedby="button-addon2">
-                                <button class="btn btn-primary" type="button" id="sendButton">
-                                    Send
-                                </button>
-                            </div>
-                            <div class="mt-2">
-                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="askSampleQuestion('Why is Nifty down today?')">Why is Nifty down? 📉</button>
-                                <button class="btn btn-sm btn-outline-secondary me-1" onclick="askSampleQuestion('How is SBI Mutual Fund performing?')">SBI MF performance? 💰</button>
-                                <button class="btn btn-sm btn-outline-secondary" onclick="askSampleQuestion('Compare Nifty with HDFC AMC')">Compare Nifty & HDFC 📊</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Interactive Visualization 📈</h5>
-                    </div>
-                    <div class="card-body">
-                        <div class="chart-container" id="chartContainer">
-                            <div class="d-flex justify-content-center align-items-center h-100 text-muted">
-                                Ask a question about market trends to see data visualizations
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-4">
-                <div class="card mb-4">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Indices & Funds 💹</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="entitiesContainer">
-                            <div class="d-flex justify-content-center">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <div class="card-header bg-primary text-white">
-                        <h5 class="mb-0">Latest News 📰</h5>
-                    </div>
-                    <div class="card-body">
-                        <div id="newsContainer">
-                            <div class="d-flex justify-content-center">
-                                <div class="spinner-border text-primary" role="status">
-                                    <span class="visually-hidden">Loading...</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Modal for help -->
-        <div class="modal fade" id="helpModal" tabindex="-1" aria-labelledby="helpModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="helpModalLabel">MyFi NewsSense Help</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                    </div>
-                    <div class="modal-body">
-                        <h6>Example Questions:</h6>
-                        <ul>
-                            <li>📉 Why is Nifty down today?</li>
-                            <li>💰 How is SBI Mutual Fund performing?</li>
-                            <li>📊 Compare Nifty with HDFC AMC</li>
-                            <li>🏦 What's happening with Bank Nifty?</li>
-                            <li>📰 Tell me about market sentiment</li>
-                            <li>💻 How did IT stocks affect Nifty recently?</li>
-                            <li>💸 What's the latest on interest rates?</li>
-                        </ul>
-                        <h6>Features:</h6>
-                        <ul>
-                            <li>Click on any entity card to quickly ask about it</li>
-                            <li>Interactive graphs - hover for details, zoom in/out</li>
-                            <li>Sentiment analysis with emoji indicators</li>
-                            <li>Dual-axis visualization comparing price and sentiment</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <footer class="bg-light py-3 mt-4">
-        <div class="container text-center">
-            <small>MyFi NewsSense - "Why is my Nifty down?" - NHCEHACK</small>
-        </div>
-    </footer>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-        // DOM elements
-        const questionInput = document.getElementById('questionInput');
-        const sendButton = document.getElementById('sendButton');
-        const chatContainer = document.getElementById('chatContainer');
-        const chartContainer = document.getElementById('chartContainer');
-        const entitiesContainer = document.getElementById('entitiesContainer');
-        const newsContainer = document.getElementById('newsContainer');
-        const showHelpButton = document.getElementById('showHelp');
+    for entity in entities:
+        if entity.upper() in question.upper():
+            mentioned.append(entity)
+    
+    if len(mentioned) < 2:
+        # If not enough entities mentioned, add NIFTY as comparison
+        if "NIFTY" not in mentioned:
+            mentioned.append("NIFTY")
+        # If still need one more, add a random one
+        if len(mentioned) < 2:
+            remaining = [e for e in entities if e not in mentioned]
+            mentioned.append(random.choice(remaining))
+    
+    # Take the first two mentioned entities
+    entity1, entity2 = mentioned[:2]
+    
+    # Get performance data
+    perf1 = "stable"
+    perf2 = "stable"
+    
+    if entity1 in mock_price_data and entity2 in mock_price_data:
+        start_price1 = mock_price_data[entity1][0]
+        end_price1 = mock_price_data[entity1][-1]
+        percent_change1 = ((end_price1 - start_price1) / start_price1) * 100
         
-        // Event listeners
-        document.addEventListener('DOMContentLoaded', function() {
-            loadEntities();
-            loadNews();
-
-            questionInput.addEventListener('keypress', function(e) {
-                if (e.key === 'Enter') {
-                    sendQuestion();
-                }
-            });
-
-            sendButton.addEventListener('click', sendQuestion);
+        start_price2 = mock_price_data[entity2][0]
+        end_price2 = mock_price_data[entity2][-1]
+        percent_change2 = ((end_price2 - start_price2) / start_price2) * 100
+        
+        if percent_change1 > percent_change2 + 1:
+            comparison = f"{entity1} has outperformed {entity2} by {abs(percent_change1 - percent_change2):.2f}% over the analyzed period"
+        elif percent_change2 > percent_change1 + 1:
+            comparison = f"{entity2} has outperformed {entity1} by {abs(percent_change2 - percent_change1):.2f}% over the analyzed period"
+        else:
+            comparison = f"{entity1} and {entity2} have shown similar performance patterns with less than 1% difference"
             
-            showHelpButton.addEventListener('click', function() {
-                const helpModal = new bootstrap.Modal(document.getElementById('helpModal'));
-                helpModal.show();
-            });
-        });
-
-        // Function to send question to API
-        async function sendQuestion() {
-            const question = questionInput.value.trim();
-            if (!question) return;
-
-            // Add user message to chat
-            addMessageToChat(question, 'user');
-            questionInput.value = '';
-
-            // Show loading message
-            const loadingId = 'loading-' + Date.now();
-            addLoadingMessage(loadingId);
-
-            try {
-                const response = await fetch('/api/ask', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ question })
-                });
-
-                const data = await response.json();
-                
-                // Remove loading message
-                removeMessage(loadingId);
-
-                // Add assistant response
-                addMessageToChat(data.text, 'assistant');
-
-                // Update chart if available
-                if (data.has_graph) {
-                    loadGraph(question, data.entity);
-                }
-
-            } catch (error) {
-                // Remove loading message
-                removeMessage(loadingId);
-                addMessageToChat('Sorry, I encountered an error. Please try again.', 'assistant');
-                console.error('Error:', error);
-            }
-        }
-
-        // Function to add message to chat
-        function addMessageToChat(message, sender) {
-            const messageDiv = document.createElement('div');
-            messageDiv.className = sender + '-message';
-            messageDiv.innerHTML = message;
-            chatContainer.appendChild(messageDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        // Function to add loading message
-        function addLoadingMessage(id) {
-            const loadingDiv = document.createElement('div');
-            loadingDiv.id = id;
-            loadingDiv.className = 'assistant-message';
-            loadingDiv.innerHTML = '<div class="spinner-border spinner-border-sm text-primary me-2" role="status"><span class="visually-hidden">Loading...</span></div> Analyzing...';
-            chatContainer.appendChild(loadingDiv);
-            chatContainer.scrollTop = chatContainer.scrollHeight;
-        }
-
-        // Function to remove message
-        function removeMessage(id) {
-            const messageToRemove = document.getElementById(id);
-            if (messageToRemove) {
-                messageToRemove.remove();
-            }
-        }
-
-        // Function to load graph
-        async function loadGraph(question, entity) {
-            try {
-                chartContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100"><div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div></div>';
-                
-                const response = await fetch(`/api/graph?question=${encodeURIComponent(question)}&entity=${encodeURIComponent(entity)}`);
-                const data = await response.json();
-                
-                if (data.error) {
-                    chartContainer.innerHTML = `<div class="d-flex justify-content-center align-items-center h-100 text-muted">${data.error}</div>`;
-                    return;
-                }
-                
-                chartContainer.innerHTML = '';
-                Plotly.newPlot(chartContainer, data.graph_data.data, data.graph_data.layout);
-                
-            } catch (error) {
-                chartContainer.innerHTML = '<div class="d-flex justify-content-center align-items-center h-100 text-muted">Error loading chart</div>';
-                console.error('Error loading graph:', error);
-            }
-        }
-
-        // Function to load entities
-        async function loadEntities() {
-            try {
-                const response = await fetch('/api/entities');
-                const data = await response.json();
-                
-                entitiesContainer.innerHTML = '';
-                
-                data.entities.forEach(entity => {
-                    const performanceClass = entity.performance.includes('-') ? 'text-danger' : 'text-success';
-                    const performanceIcon = entity.performance.includes('-') ? '📉' : '📈';
-                    
-                    const entityCard = document.createElement('div');
-                    entityCard.className = 'card entity-card mb-2';
-                    entityCard.innerHTML = `
-                        <div class="card-body p-2">
-                            <h6 class="card-title">${entity.symbol} ${performanceIcon}</h6>
-                            <p class="card-text small mb-1">${entity.description}</p>
-                            <p class="card-text ${performanceClass} fw-bold mb-0">${entity.performance}</p>
-                        </div>
-                    `;
-                    
-                    entityCard.addEventListener('click', () => {
-                        askSampleQuestion(`Tell me about ${entity.symbol}`);
-                    });
-                    
-                    entitiesContainer.appendChild(entityCard);
-                });
-                
-            } catch (error) {
-                entitiesContainer.innerHTML = '<div class="alert alert-danger">Error loading entities</div>';
-                console.error('Error loading entities:', error);
-            }
-        }
-
-        // Function to load news
-        async function loadNews() {
-            try {
-                const response = await fetch('/api/articles');
-                const data = await response.json();
-                
-                newsContainer.innerHTML = '';
-                
-                // Show just the first few articles
-                const articlesToShow = data.articles.slice(0, 5);
-                
-                articlesToShow.forEach(article => {
-                    const newsItem = document.createElement('div');
-                    newsItem.className = 'news-item';
-                    
-                    // Determine sentiment icon
-                    let sentimentIcon = '📊';
-                    if (article.title.toLowerCase().includes('down') || 
-                        article.title.toLowerCase().includes('fall') || 
-                        article.title.toLowerCase().includes('drop')) {
-                        sentimentIcon = '📉';
-                        newsItem.style.borderLeftColor = '#dc3545';
-                    } else if (article.title.toLowerCase().includes('up') || 
-                             article.title.toLowerCase().includes('rise') || 
-                             article.title.toLowerCase().includes('gain')) {
-                        sentimentIcon = '📈';
-                        newsItem.style.borderLeftColor = '#28a745';
-                    }
-                    
-                    newsItem.innerHTML = `
-                        <h6>${sentimentIcon} ${article.title}</h6>
-                        <p class="small text-muted mb-1">${article.source} · ${article.date}</p>
-                        <p class="small">${article.snippet}</p>
-                    `;
-                    
-                    newsContainer.appendChild(newsItem);
-                });
-                
-            } catch (error) {
-                newsContainer.innerHTML = '<div class="alert alert-danger">Error loading news</div>';
-                console.error('Error loading news:', error);
-            }
-        }
-
-        // Function to ask sample question
-        function askSampleQuestion(question) {
-            questionInput.value = question;
-            sendQuestion();
-        }
-    </script>
-</body>
-</html>
-            ''')
-
-if __name__ == '__main__':
-    # Create templates before running the app
-    create_templates()
+        if percent_change1 > 0:
+            perf1 = "positive"
+        elif percent_change1 < 0:
+            perf1 = "negative"
+            
+        if percent_change2 > 0:
+            perf2 = "positive"
+        elif percent_change2 < 0:
+            perf2 = "negative"
+    else:
+        comparison = f"Comparing {entity1} and {entity2} shows interesting contrasts in their market behavior"
     
-    # Run the app
-    app.run(debug=True, port=5000) 
+    responses = [
+        f"Comparative analysis of {entity1} and {entity2}: {comparison}. {entity1} has shown {perf1} momentum influenced by sector-specific factors, while {entity2} has demonstrated {perf2} trends due to its distinctive market positioning.",
+        f"{comparison}. The divergence can be explained by different sectoral exposures and institutional investor preferences. {entity1} is more sensitive to global cues, whereas {entity2} responds strongly to domestic economic indicators.",
+        f"When analyzing {entity1} versus {entity2}, {comparison}. This reflects their different risk profiles and market capitalization characteristics. Trading volumes indicate shifting investor sentiment between these options."
+    ]
+    
+    return random.choice(responses)
+
+def generate_general_response(entity):
+    """Generate a general response about an entity"""
+    responses = [
+        f"{entity} has been showing mixed signals with periods of consolidation followed by directional moves. Key technical levels to watch include support at recent lows and resistance at the moving averages.",
+        f"Analysis of {entity} indicates that market sentiment remains cautiously optimistic despite recent volatility. Institutional positioning suggests accumulation at current levels.",
+        f"The outlook for {entity} depends on upcoming economic data releases and policy decisions. Current price action indicates a phase of price discovery with balanced volumes.",
+        f"{entity} performance has been influenced by sectoral rotation and liquidity flows. Recent price patterns suggest a potential trend change, though confirmation is needed."
+    ]
+    return random.choice(responses)
+
+def generate_chart_data(entity, question):
+    """Generate chart data for visualization"""
+    # Get price data for the entity
+    price_data = mock_price_data.get(entity, mock_price_data["NIFTY"])
+    
+    # Generate dates for the x-axis (last 30 days)
+    end_date = datetime.now()
+    dates = [(end_date - timedelta(days=i)).strftime("%Y-%m-%d") for i in range(30, 0, -1)]
+    
+    # Base chart with price data
+    chart_data = [
+        {
+            "x": dates,
+            "y": price_data,
+            "type": "scatter",
+            "mode": "lines",
+            "name": f"{entity} Price",
+            "line": {"color": "rgb(75, 192, 192)", "width": 2}
+        }
+    ]
+    
+    # If it's a comparison, add the second entity
+    if "compare" in question.lower():
+        other_entity = None
+        for e in ["NIFTY", "SBI", "HDFC", "ICICI", "BANKNIFTY"]:
+            if e.upper() in question.upper() and e != entity:
+                other_entity = e
+                break
+        
+        if not other_entity:
+            # Pick a random different entity
+            entities = ["NIFTY", "SBI", "HDFC", "ICICI", "BANKNIFTY"]
+            other_entities = [e for e in entities if e != entity]
+            other_entity = random.choice(other_entities)
+        
+        other_price_data = mock_price_data.get(other_entity, mock_price_data["SBI"])
+        
+        # Normalize both datasets for comparison (start at 100)
+        base_price = price_data[0]
+        normalized_price = [price * 100 / base_price for price in price_data]
+        
+        other_base_price = other_price_data[0]
+        other_normalized_price = [price * 100 / other_base_price for price in other_price_data]
+        
+        chart_data = [
+            {
+                "x": dates,
+                "y": normalized_price,
+                "type": "scatter",
+                "mode": "lines",
+                "name": entity,
+                "line": {"color": "rgb(75, 192, 192)", "width": 2}
+            },
+            {
+                "x": dates,
+                "y": other_normalized_price,
+                "type": "scatter",
+                "mode": "lines",
+                "name": other_entity,
+                "line": {"color": "rgb(255, 99, 132)", "width": 2}
+            }
+        ]
+    
+    # Add layout
+    layout = {
+        "title": f"{entity} Market Performance",
+        "xaxis": {"title": "Date"},
+        "yaxis": {"title": "Price"},
+        "margin": {"l": 40, "r": 40, "t": 40, "b": 40},
+        "paper_bgcolor": "#20232a",
+        "plot_bgcolor": "#282c34",
+        "font": {"color": "#ffffff"},
+        "showlegend": True,
+        "legend": {"orientation": "h", "y": -0.2}
+    }
+    
+    return {
+        "data": chart_data,
+        "layout": layout
+    }
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)), debug=True) 
