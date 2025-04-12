@@ -7,22 +7,36 @@ import json
 import random
 import uuid
 from datetime import datetime, timedelta
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
 
 # Import our NSE data scraper
 from nse_scraper import get_quote, get_historical_data, get_top_gainers, get_top_losers, fetch_news_for_stock
 
 # Initialize Flask app
-app = Flask(__name__)
+app = Flask(__name__, template_folder='templates')
 CORS(app)  # Enable CORS for all routes
 
 # List of popular Indian stocks for recognition
 POPULAR_INDIAN_STOCKS = [
-    "NIFTY", "SENSEX", "BANKNIFTY", "RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK", 
+    # Major Indices
+    "NIFTY", "SENSEX", "BANKNIFTY", 
+    
+    # Large Cap Listed Companies
+    "RELIANCE", "TCS", "HDFCBANK", "INFY", "ICICIBANK", 
     "HINDUNILVR", "ITC", "SBIN", "BHARTIARTL", "KOTAKBANK", "BAJFINANCE", "ASIANPAINT",
     "MARUTI", "AXISBANK", "WIPRO", "TATAMOTORS", "SUNPHARMA", "TITAN", "BAJAJFINSV",
-    "LTIM", "HCLTECH", "ADANIENT", "NTPC", "JSWSTEEL", "ULTRACEMCO", "TATASTEEL", "M&M"
+    "LTIM", "HCLTECH", "ADANIENT", "NTPC", "JSWSTEEL", "ULTRACEMCO", "TATASTEEL", "M&M",
+    
+    # Mid & Small Cap Stocks
+    "ZOMATO", "PAYTM", "POLICYBZR", "NYKAA", "DMART", "IRCTC", "DEEPAKNTR", "LICI",
+    "HAVELLS", "TATAPOWER", "JUBLFOOD", "INDIGO", "PNB", "BANKBARODA", "ABFRL", "IDEA",
+    "MOTHERSON", "FINEORG", "AFFLE", "LALPATHLAB", "TRENT", "HAPPSTMNDS", "GLAXO", "ONGC",
+    
+    # Popular Unlisted Companies (will use mock data for these)
+    "SWIGGY", "OLA", "BYJU", "ZERODHA", "CRED", "MEESHO", "RAZORPAY", "BHAIRAVAI",
+    "FRESHWORKS", "OLAMONEY", "ISHA", "JIOMART", "DREAM11", "UNACADEMY", "LENSKART", "PHARMEASY",
+    "SNAPDEAL", "BIGBASKET", "UPSTOX", "GROWW", "UDAAN", "DAILYHUNT", "SHARECHAT", "DUNZO"
 ]
 
 # Cache for storing scraped data (to avoid hitting rate limits)
@@ -30,6 +44,14 @@ CACHE = {}
 
 def extract_stock_symbol(message):
     """Extract stock symbol from message, advanced version"""
+    # For general greetings or casual messages, don't extract a stock
+    greeting_phrases = ["hi", "hello", "hey", "good morning", "good evening", "good afternoon", 
+                       "what's up", "how are you", "how's it going", "help", "who are you"]
+    
+    # Check if message is just a greeting
+    if message.lower() in greeting_phrases or any(greeting in message.lower() for greeting in greeting_phrases):
+        return None
+        
     # First check for known stocks
     for stock in POPULAR_INDIAN_STOCKS:
         if stock.upper() in message.upper():
@@ -46,8 +68,11 @@ def extract_stock_symbol(message):
             clean_word not in ['AND', 'THE', 'FOR', 'HOW', 'WHY', 'WHAT', 'WHO', 'WHERE', 'WHEN', 'WHICH', 'ABOUT', 'TELL']):
             return clean_word
     
-    # Default to NIFTY if nothing found
-    return "NIFTY"
+    # For general conversation, don't default to NIFTY
+    if any(term in message.lower() for term in ["stock", "market", "trading", "invest", "price", "share"]):
+        return "NIFTY"  # Only default to NIFTY for stock-related queries
+        
+    return None
 
 # API endpoints
 @app.route('/api/chat', methods=['POST'])
@@ -55,12 +80,75 @@ def chat():
     """Main chat endpoint for frontend integration"""
     data = request.json
     message = data.get('message', '')
+    chat_history = data.get('chat_history', [])
     
     if not message:
         return jsonify({"error": "No message provided"}), 400
     
-    # Identify entity mentioned in message
+    # Store the user message in chat history
+    if 'chat_history' not in data:
+        chat_history = [{"role": "user", "content": message}]
+    else:
+        chat_history.append({"role": "user", "content": message})
+    
+    # Identify entity mentioned in message or from chat history
     entity = extract_stock_symbol(message)
+    
+    # Handle general conversation if no stock is mentioned
+    if entity is None:
+        # Generate conversational response
+        if any(greeting in message.lower() for greeting in ["hi", "hello", "hey", "good morning"]):
+            response = "Hello! I'm your stock market assistant. I can help you with information about Indian stocks, market trends, and financial news. What would you like to know about today?"
+        
+        elif "how are you" in message.lower() or "what's up" in message.lower():
+            response = "I'm doing well, thanks for asking! I'm ready to help you with stock market information. You can ask me about any Indian stock, including unlisted companies like Swiggy or Zerodha!"
+        
+        elif "who are you" in message.lower() or "what can you do" in message.lower():
+            response = "I'm StockSense AI, your personal stock market assistant. I can provide real-time information about Indian stocks, track market trends, compare companies, and show you the latest financial news. Try asking about a specific stock like 'How is Reliance performing?' or 'Tell me about Swiggy.'"
+        
+        elif "help" in message.lower():
+            response = """I can help you with:
+            
+• Stock prices and performance (e.g., "How is TCS doing today?")
+• Company information (e.g., "Tell me about Swiggy")
+• Stock comparisons (e.g., "Compare HDFC Bank with SBI")
+• Market news (e.g., "Show me news for Reliance")
+• Market trends (e.g., "Is the banking sector up today?")
+
+Just ask about any Indian stock, and I'll provide you with real-time information!"""
+        
+        else:
+            # Generic conversation about stocks
+            response = "I'm your stock market assistant, focused on helping with Indian stocks and market information. You can ask me about stock prices, trends, company news, or comparisons between companies. What specific stock or market information would you like to know about today?"
+        
+        # Add response to chat history
+        chat_history.append({"role": "assistant", "content": response})
+        
+        # Limit chat history to last 10 messages
+        if len(chat_history) > 10:
+            chat_history = chat_history[-10:]
+        
+        return jsonify({
+            "id": str(uuid.uuid4()),
+            "content": response,
+            "has_graph": False,
+            "chat_history": chat_history
+        })
+    
+    # Check chat history for context of previous entities discussed
+    context_entities = []
+    comparison_mode = False
+    
+    for msg in chat_history:
+        if msg["role"] == "user":
+            # Extract additional entities from chat history
+            potential_entity = extract_stock_symbol(msg["content"])
+            if potential_entity and potential_entity != entity and potential_entity not in context_entities:
+                context_entities.append(potential_entity)
+            
+            # Check if user is asking for a comparison
+            if "compare" in msg["content"].lower() or "vs" in msg["content"].lower() or "versus" in msg["content"].lower():
+                comparison_mode = True
     
     # Get real-time stock data
     try:
@@ -77,57 +165,91 @@ def chat():
         # Check if user wants professional format
         use_professional_format = any(term in message.lower() for term in ["professional", "newssense", "business", "formal", "analyst", "concise"])
         
-        # Generate response based on message content and format preference
-        if use_professional_format:
-            sentiment = "positive" if stock_data['pChange'] > 0 else "negative" if stock_data['pChange'] < 0 else "neutral"
-            response = generate_professional_analysis(entity, stock_data, historical_data, news_articles, sentiment)
-        elif any(term in message.lower() for term in ["down", "fall", "decline", "dropped"]):
-            basic_response = generate_down_response(entity, stock_data)
-            response = generate_structured_analysis(entity, stock_data, historical_data, basic_response, news_articles, sentiment="negative")
-        elif any(term in message.lower() for term in ["up", "rise", "gain", "growth"]):
-            basic_response = generate_up_response(entity, stock_data)
-            response = generate_structured_analysis(entity, stock_data, historical_data, basic_response, news_articles, sentiment="positive")
-        elif "compare" in message.lower():
-            # Find second entity to compare
-            second_entity = None
-            # Look for other mentioned stocks
+        # Conversational mode
+        is_conversational = any(term in message.lower() for term in ["tell me more", "explain", "elaborate", "details", "why", "how", "what about", "chat", "discuss"])
+        
+        # Generate response based on message content and chat history
+        if comparison_mode and len(context_entities) > 0:
+            # Use the most recent entity from context for comparison
+            second_entity = context_entities[0]
+            
+            # If "compare X with Y" is explicitly mentioned
             for stock in POPULAR_INDIAN_STOCKS:
                 if stock.upper() in message.upper() and stock != entity:
                     second_entity = stock
                     break
             
-            if not second_entity:
-                # Try to find a second stock mention
-                parts = message.split("compare")[1].split("with" if "with" in message.lower() else "and" if "and" in message.lower() else "to" if "to" in message.lower() else " ")
-                if len(parts) > 1:
-                    potential_second = extract_stock_symbol(parts[1])
-                    if potential_second != entity:
-                        second_entity = potential_second
-            
-            # If still nothing, just pick a random one
-            if not second_entity:
-                second_entity = random.choice([s for s in POPULAR_INDIAN_STOCKS if s != entity])
-            
             # Get second stock data
             second_stock_data = get_quote(second_entity)
             second_historical_data = get_historical_data(second_entity)
             
-            # Generate comparison response
+            # Generate comparison response in conversational style
             response = generate_comparison_response(entity, stock_data, second_entity, second_stock_data)
+            
+            # Add conversational elements
+            response += f"\n\nIs there anything specific about {entity} or {second_entity} you'd like to know more about? I can provide details on their financials, recent news, or technical analysis."
             
             # Create comparison chart
             chart_data = create_comparison_chart(
                 entity, historical_data,
                 second_entity, second_historical_data
             )
+        elif is_conversational:
+            # More detailed conversational response
+            basic_response = generate_general_response(entity, stock_data)
+            sentiment = "positive" if stock_data['pChange'] > 0 else "negative" if stock_data['pChange'] < 0 else "neutral"
+            
+            # Add more conversational elements based on chat history
+            chat_context = ""
+            if len(chat_history) > 2:
+                chat_context = "\n\nBased on our conversation, I understand you're interested in " + entity + "."
+                
+                # Add personalized suggestions
+                chat_context += f" Would you like to know more about recent news affecting {entity}, technical analysis, or how it compares to competitors like "
+                
+                # Suggest related stocks
+                if entity in ["NIFTY", "SENSEX", "BANKNIFTY"]:
+                    chat_context += "other market indices?"
+                elif entity in ["TCS", "INFY", "WIPRO", "HCLTECH"]:
+                    chat_context += "other IT companies?"
+                elif entity in ["HDFCBANK", "ICICIBANK", "KOTAKBANK", "SBIN"]:
+                    chat_context += "other banking stocks?"
+                elif entity in ["SWIGGY", "ZOMATO"]:
+                    chat_context += "other food delivery companies?"
+                else:
+                    chat_context += "similar companies in this sector?"
+            
+            # Generate detailed analysis with conversational elements
+            response = generate_structured_analysis(entity, stock_data, historical_data, basic_response, news_articles, sentiment) + chat_context
+            
+        elif use_professional_format:
+            sentiment = "positive" if stock_data['pChange'] > 0 else "negative" if stock_data['pChange'] < 0 else "neutral"
+            response = generate_professional_analysis(entity, stock_data, historical_data, news_articles, sentiment)
+            response += f"\n\nWould you like any specific details about {entity} that aren't covered in this analysis?"
+        elif any(term in message.lower() for term in ["down", "fall", "decline", "dropped"]):
+            basic_response = generate_down_response(entity, stock_data)
+            response = generate_structured_analysis(entity, stock_data, historical_data, basic_response, news_articles, sentiment="negative")
+            response += f"\n\nIs there anything specific about why {entity} is declining that you'd like to understand better?"
+        elif any(term in message.lower() for term in ["up", "rise", "gain", "growth"]):
+            basic_response = generate_up_response(entity, stock_data)
+            response = generate_structured_analysis(entity, stock_data, historical_data, basic_response, news_articles, sentiment="positive")
+            response += f"\n\nWould you like to know more about the factors driving {entity}'s growth today?"
         else:
             basic_response = generate_general_response(entity, stock_data)
             sentiment = "positive" if stock_data['pChange'] > 0 else "negative" if stock_data['pChange'] < 0 else "neutral"
             response = generate_structured_analysis(entity, stock_data, historical_data, basic_response, news_articles, sentiment=sentiment)
+            response += f"\n\nI can provide more insights about {entity} - just ask about its news, financials, or technical analysis."
         
         # Create chart data if not already created (for comparison)
-        if 'compare' not in message.lower():
+        if not comparison_mode:
             chart_data = create_stock_chart(entity, historical_data, stock_data)
+        
+        # Add response to chat history
+        chat_history.append({"role": "assistant", "content": response})
+        
+        # Limit chat history to last 10 messages to prevent it from growing too large
+        if len(chat_history) > 10:
+            chat_history = chat_history[-10:]
         
         return jsonify({
             "id": str(uuid.uuid4()),
@@ -140,17 +262,24 @@ def chat():
                 "change": stock_data['change'],
                 "pChange": stock_data['pChange'],
                 "lastUpdateTime": stock_data['lastUpdateTime']
-            }
+            },
+            "chat_history": chat_history
         })
         
     except Exception as e:
         print(f"Error in chat endpoint: {str(e)}")
+        error_response = f"I encountered an issue while retrieving data for {entity}. This could be due to market hours or connection issues. Please try again or ask about a different stock."
+        
+        # Add error response to chat history
+        chat_history.append({"role": "assistant", "content": error_response})
+        
         return jsonify({
             "id": str(uuid.uuid4()),
-            "content": f"I encountered an issue while retrieving data for {entity}. This could be due to market hours or connection issues. Please try again or ask about a different stock.",
+            "content": error_response,
             "has_graph": False,
             "entity": entity,
-            "error": str(e)
+            "error": str(e),
+            "chat_history": chat_history
         })
 
 @app.route('/api/entities', methods=['GET'])
@@ -531,9 +660,12 @@ def format_volume(volume):
 def get_stock_description(symbol):
     """Get description for standard symbols"""
     descriptions = {
+        # Indices
         "NIFTY": "Nifty 50 - India's benchmark stock market index",
         "SENSEX": "S&P BSE SENSEX - Index of 30 well-established companies",
         "BANKNIFTY": "Bank Nifty - Index tracking banking sector stocks",
+        
+        # Large Cap Listed Companies
         "RELIANCE": "Reliance Industries - India's largest conglomerate",
         "TCS": "Tata Consultancy Services - India's largest IT services company",
         "HDFCBANK": "HDFC Bank - India's largest private sector bank by assets",
@@ -545,7 +677,68 @@ def get_stock_description(symbol):
         "BHARTIARTL": "Bharti Airtel - Leading telecommunications company",
         "KOTAKBANK": "Kotak Mahindra Bank - Major private sector bank",
         "BAJFINANCE": "Bajaj Finance - Leading non-banking financial company",
-        "ASIANPAINT": "Asian Paints - India's largest paint company"
+        "ASIANPAINT": "Asian Paints - India's largest paint company",
+        "TATAMOTORS": "Tata Motors - India's leading automobile manufacturer",
+        "WIPRO": "Wipro - Global IT, consulting and business process services company",
+        "TITAN": "Titan Company - Leading watch and jewelry retailer",
+        "M&M": "Mahindra & Mahindra - Major automobile and farm equipment manufacturer",
+        "SUNPHARMA": "Sun Pharmaceutical - India's largest pharma company",
+        "ADANIENT": "Adani Enterprises - Flagship company of the Adani Group",
+        "HCLTECH": "HCL Technologies - Global IT services and consulting company",
+        "TATASTEEL": "Tata Steel - One of the world's leading steel companies",
+        "NTPC": "NTPC - India's largest power generation company",
+        "JSWSTEEL": "JSW Steel - Leading integrated steel manufacturer",
+        
+        # Mid & Small Cap Stocks
+        "ZOMATO": "Zomato - Leading food delivery and restaurant discovery platform",
+        "PAYTM": "Paytm - Digital payments and financial services platform",
+        "POLICYBZR": "PB Fintech (Policybazaar) - Insurance and credit comparison platform",
+        "NYKAA": "FSN E-Commerce (Nykaa) - Beauty and personal care e-commerce platform",
+        "DMART": "Avenue Supermarts (DMart) - Hypermarket and retail chain",
+        "IRCTC": "Indian Railway Catering and Tourism Corporation - Railway ticketing platform",
+        "DEEPAKNTR": "Deepak Nitrite - Chemical manufacturing company",
+        "LICI": "Life Insurance Corporation of India - India's largest insurer",
+        "HAVELLS": "Havells India - Electrical equipment manufacturer",
+        "TATAPOWER": "Tata Power - Integrated power company",
+        "JUBLFOOD": "Jubilant FoodWorks - Operates Domino's Pizza and Dunkin' Donuts in India",
+        "INDIGO": "InterGlobe Aviation (IndiGo) - India's largest airline by market share",
+        "PNB": "Punjab National Bank - Major public sector bank",
+        "BANKBARODA": "Bank of Baroda - Large public sector bank",
+        "ABFRL": "Aditya Birla Fashion and Retail - Fashion retail company",
+        "IDEA": "Vodafone Idea - Telecom service provider",
+        "MOTHERSON": "Samvardhana Motherson - Auto components manufacturer",
+        "FINEORG": "Fine Organic Industries - Specialty chemicals manufacturer",
+        "AFFLE": "Affle India - Mobile marketing technology company",
+        "LALPATHLAB": "Dr. Lal PathLabs - Diagnostic and pathology services",
+        "TRENT": "Trent (Westside) - Retail chain from Tata Group",
+        "HAPPSTMNDS": "Happiest Minds Technologies - Digital transformation IT services",
+        "GLAXO": "GlaxoSmithKline Pharmaceuticals - Pharmaceuticals company",
+        
+        # Unlisted Companies
+        "SWIGGY": "Swiggy - Food delivery and quick commerce platform valued at $10.7 billion",
+        "OLA": "Ola - Ride-hailing service competing with Uber in India",
+        "BYJU": "BYJU'S - Leading EdTech company and world's most valuable education startup",
+        "ZERODHA": "Zerodha - India's largest discount broker with 15+ million customers",
+        "CRED": "CRED - Credit card bill payment platform for premium customers",
+        "MEESHO": "Meesho - Social commerce platform focused on small businesses",
+        "RAZORPAY": "Razorpay - Payment gateway and neo-banking services provider",
+        "BHAIRAVAI": "BhairavAI - AI infrastructure platform for real-time data processing",
+        "FRESHWORKS": "Freshworks - SaaS company offering customer engagement software",
+        "OLAMONEY": "Ola Money - Digital wallet and financial services by Ola",
+        "ISHA": "Isha Foundation - Non-profit spiritual organization with business ventures",
+        "JIOMART": "JioMart - E-commerce venture by Reliance Retail",
+        "DREAM11": "Dream11 - Fantasy sports platform and India's first gaming unicorn",
+        "UNACADEMY": "Unacademy - Online learning platform for competitive exams",
+        "LENSKART": "Lenskart - Eyewear retail chain with omnichannel presence",
+        "PHARMEASY": "PharmEasy - Online pharmacy and healthcare delivery platform",
+        "SNAPDEAL": "Snapdeal - E-commerce marketplace focusing on value segment",
+        "BIGBASKET": "BigBasket - Online grocery delivery service",
+        "UPSTOX": "Upstox - Discount broker backed by Ratan Tata and Tiger Global",
+        "GROWW": "Groww - Investment platform for stocks, mutual funds and crypto",
+        "UDAAN": "Udaan - B2B e-commerce platform connecting retailers with manufacturers",
+        "DAILYHUNT": "Dailyhunt - News and content aggregator platform",
+        "SHARECHAT": "ShareChat - Indian social media platform in regional languages",
+        "DUNZO": "Dunzo - Hyperlocal delivery service for everyday essentials"
     }
     
     return descriptions.get(symbol, f"{symbol} - Indian stock")
@@ -792,10 +985,14 @@ Sentiment trends from news articles suggest a {sentiment_description} for {entit
         news_links_section = "\n\n📰 Recent News Articles\n"
         for i, article in enumerate(news_articles[:3]):
             sentiment_icon = "📈" if article['sentiment'] == "positive" else "📉" if article['sentiment'] == "negative" else "📊"
+            # Ensure redirect URL is correctly formatted
             url = article.get('redirect_url', article['url'])
+            if not url.startswith("http"):
+                url = f"https://www.{url}"
             title = article['title']
             source = article['source']
             date = article['date']
+            # Format as clickable link with full URL
             news_links_section += f"{sentiment_icon} {title}\n\nSource: {source}, {date}\n\nLink: {url}\n\n{'-'*50}\n\n"
     
     # Combine all sections
@@ -887,7 +1084,10 @@ def generate_professional_analysis(entity, stock_data, historical_data, news_art
     news_section = ""
     if news_articles and len(news_articles) > 0:
         for i, article in enumerate(news_articles[:3]):
+            # Ensure redirect URL is correctly formatted
             url = article.get('redirect_url', article['url'])
+            if not url.startswith("http"):
+                url = f"https://www.{url}"
             title = article['title']
             source = article['source']
             date = article['date']
@@ -932,8 +1132,14 @@ Key support level established at ₹{support_level} with immediate resistance at
     
     return response
 
+# Add route for chat interface
+@app.route('/')
+def index():
+    """Serve the chat interface"""
+    return render_template('chat.html')
+
 # Run the app
 if __name__ == '__main__':
-    print("Starting real-time Indian stock market API server...")
+    print("Starting real-time Indian stock market API...")
     print("Now using LIVE DATA scraping with fallback mechanisms!")
     app.run(host='0.0.0.0', port=5000, debug=True) 

@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StockChat - Interactive Stock Assistant</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body {
+            background-color: #1e2130;
+            color: #ffffff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        .chat-container {
+            height: calc(100vh - 180px);
+            background-color: #282c34;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            display: flex;
+            flex-direction: column;
+        }
+        .chat-header {
+            padding: 15px;
+            background-color: #20232a;
+            border-radius: 10px 10px 0 0;
+            display: flex;
+            align-items: center;
+        }
+        .chat-header img {
+            width: 32px;
+            margin-right: 10px;
+        }
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 15px;
+        }
+        .message {
+            padding: 10px 15px;
+            margin-bottom: 15px;
+            border-radius: 18px;
+            max-width: 75%;
+            position: relative;
+        }
+        .user-message {
+            background-color: #4a76a8;
+            margin-left: auto;
+            border-bottom-right-radius: 5px;
+        }
+        .bot-message {
+            background-color: #3a3f4b;
+            margin-right: auto;
+            border-bottom-left-radius: 5px;
+            white-space: pre-wrap;
+        }
+        .chat-input {
+            padding: 15px;
+            background-color: #20232a;
+            border-radius: 0 0 10px 10px;
+        }
+        .form-control {
+            background-color: #1e2130;
+            border: 1px solid #444;
+            color: #ffffff;
+        }
+        .form-control:focus {
+            background-color: #1e2130;
+            color: #ffffff;
+            border-color: #4a76a8;
+            box-shadow: 0 0 0 0.25rem rgba(74, 118, 168, 0.25);
+        }
+        .btn-primary {
+            background-color: #4a76a8;
+            border-color: #4a76a8;
+        }
+        .btn-primary:hover {
+            background-color: #3d6293;
+            border-color: #3d6293;
+        }
+        .chart-container {
+            height: 300px;
+            background-color: #282c34;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            margin-bottom: 20px;
+            padding: 15px;
+        }
+        .stock-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .stock-card {
+            background-color: #282c34;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            min-width: 180px;
+            text-align: center;
+            margin: 0 10px;
+        }
+        .stock-price {
+            font-size: 1.8rem;
+            font-weight: bold;
+        }
+        .stock-change {
+            font-size: 1.2rem;
+        }
+        .positive {
+            color: #4caf50;
+        }
+        .negative {
+            color: #f44336;
+        }
+        .neutral {
+            color: #9e9e9e;
+        }
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .spinner-border {
+            margin-right: 10px;
+        }
+        .news-link {
+            color: #4a9edb;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4 mb-4">
+        <h1 class="text-center mb-4">StockChat <small class="text-muted">Real-time Stock Assistant</small></h1>
+        
+        <div class="row">
+            <div class="col-md-8">
+                <div class="chat-container">
+                    <div class="chat-header">
+                        <img src="https://img.icons8.com/color/48/000000/chatbot.png" alt="Bot Icon">
+                        <h5 class="mb-0">StockSense AI</h5>
+                    </div>
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message bot-message">
+                            Hi there! I'm StockSense, your personal stock assistant. I can provide real-time information about Indian stocks, including market indices, listed companies, and even unlisted companies like Swiggy and Zerodha!
+                            
+                            Try asking me things like:
+                            • "How is RELIANCE performing today?"
+                            • "Tell me about Swiggy stock"
+                            • "Compare TCS with Infosys"
+                            • "Show me news for HDFC Bank"
+                            • "Why is Zomato stock up/down today?"
+                        </div>
+                    </div>
+                    <div class="chat-input">
+                        <form id="chatForm">
+                            <div class="input-group">
+                                <input type="text" class="form-control" id="userInput" placeholder="Ask about any Indian stock..." autocomplete="off">
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="bi bi-send"></i> Send
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div id="stockInfoContainer" style="display: none;">
+                    <div class="stock-card mb-3">
+                        <h5 id="stockSymbol">-</h5>
+                        <div class="stock-price" id="stockPrice">-</div>
+                        <div class="stock-change" id="stockChange">-</div>
+                        <small id="lastUpdated">-</small>
+                    </div>
+                </div>
+                <div class="chart-container" id="chartContainer">
+                    <div id="stockChart"></div>
+                </div>
+                <div class="card bg-dark text-white">
+                    <div class="card-header">Suggested Questions</div>
+                    <div class="list-group list-group-flush" id="suggestions">
+                        <button class="list-group-item list-group-item-action bg-dark text-white suggestion">Hey there!</button>
+                        <button class="list-group-item list-group-item-action bg-dark text-white suggestion">Tell me about Swiggy</button>
+                        <button class="list-group-item list-group-item-action bg-dark text-white suggestion">Compare HDFC Bank with SBI</button>
+                        <button class="list-group-item list-group-item-action bg-dark text-white suggestion">What stocks are trending today?</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global chat history
+        let chatHistory = [];
+        let currentEntity = null;
+
+        // Initialize on load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set up event listener for chat form
+            document.getElementById('chatForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                const userInput = document.getElementById('userInput');
+                const message = userInput.value.trim();
+                
+                if (message) {
+                    addMessage(message, 'user');
+                    userInput.value = '';
+                    sendMessageToAPI(message);
+                }
+            });
+            
+            // Add Enter key handler for input field
+            document.getElementById('userInput').addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    document.getElementById('chatForm').dispatchEvent(new Event('submit'));
+                }
+            });
+            
+            // Set up event listeners for suggestion buttons
+            document.querySelectorAll('.suggestion').forEach(button => {
+                button.addEventListener('click', function() {
+                    const message = this.textContent;
+                    document.getElementById('userInput').value = message;
+                    addMessage(message, 'user');
+                    sendMessageToAPI(message);
+                });
+            });
+            
+            // Fetch suggestions from API
+            fetchSuggestions();
+        });
+
+        // Add a message to the chat
+        function addMessage(message, sender) {
+            const chatMessages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            messageDiv.classList.add('message');
+            
+            if (sender === 'user') {
+                messageDiv.classList.add('user-message');
+                messageDiv.textContent = message;
+            } else {
+                messageDiv.classList.add('bot-message');
+                // Process links in bot messages
+                let formattedMessage = message;
+                
+                // Format links
+                const linkRegex = /Link: (https:\/\/[^\s]+)/g;
+                formattedMessage = formattedMessage.replace(linkRegex, function(match, url) {
+                    return `Link: <a href="${url}" class="news-link" target="_blank">${url}</a>`;
+                });
+                
+                messageDiv.innerHTML = formattedMessage;
+            }
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Add a loading indicator
+        function addLoadingIndicator() {
+            const chatMessages = document.getElementById('chatMessages');
+            const loadingDiv = document.createElement('div');
+            loadingDiv.classList.add('message', 'bot-message', 'loading');
+            loadingDiv.id = 'loadingIndicator';
+            
+            loadingDiv.innerHTML = `
+                <div class="spinner-border spinner-border-sm text-light" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+                <span>Thinking...</span>
+            `;
+            
+            chatMessages.appendChild(loadingDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Remove loading indicator
+        function removeLoadingIndicator() {
+            const loadingIndicator = document.getElementById('loadingIndicator');
+            if (loadingIndicator) {
+                loadingIndicator.remove();
+            }
+        }
+
+        // Send message to API
+        function sendMessageToAPI(message) {
+            addLoadingIndicator();
+            
+            fetch('/api/chat', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    message: message,
+                    chat_history: chatHistory
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                removeLoadingIndicator();
+                
+                // Update chat history
+                chatHistory = data.chat_history || [];
+                
+                // Add bot response
+                addMessage(data.content, 'bot');
+                
+                // Update stock info if available
+                if (data.live_data) {
+                    updateStockInfo(data.entity, data.live_data);
+                    document.getElementById('stockInfoContainer').style.display = 'block';
+                } else {
+                    document.getElementById('stockInfoContainer').style.display = 'none';
+                }
+                
+                // Update chart if available
+                if (data.chart_data && data.has_graph) {
+                    document.getElementById('chartContainer').style.display = 'block';
+                    renderChart(data.chart_data);
+                } else {
+                    document.getElementById('chartContainer').style.display = 'none';
+                }
+                
+                // Store current entity
+                currentEntity = data.entity;
+                
+                // If entity changed, fetch new suggestions
+                if (currentEntity) {
+                    fetchSuggestions();
+                }
+            })
+            .catch(error => {
+                removeLoadingIndicator();
+                console.error('Error:', error);
+                addMessage('Sorry, I encountered an error while processing your request. Please try again.', 'bot');
+            });
+        }
+
+        // Update stock info
+        function updateStockInfo(symbol, liveData) {
+            const container = document.getElementById('stockInfoContainer');
+            const symbolEl = document.getElementById('stockSymbol');
+            const priceEl = document.getElementById('stockPrice');
+            const changeEl = document.getElementById('stockChange');
+            const lastUpdatedEl = document.getElementById('lastUpdated');
+            
+            // Show container
+            container.style.display = 'block';
+            
+            // Update values
+            symbolEl.textContent = symbol;
+            priceEl.textContent = `₹${liveData.price.toFixed(2)}`;
+            
+            const change = liveData.change;
+            const pChange = liveData.pChange;
+            const changeText = `${change >= 0 ? '+' : ''}${change.toFixed(2)} (${pChange >= 0 ? '+' : ''}${pChange.toFixed(2)}%)`;
+            
+            changeEl.textContent = changeText;
+            
+            // Apply color based on change
+            changeEl.className = 'stock-change';
+            if (pChange > 0) {
+                changeEl.classList.add('positive');
+            } else if (pChange < 0) {
+                changeEl.classList.add('negative');
+            } else {
+                changeEl.classList.add('neutral');
+            }
+            
+            // Update last updated time
+            if (liveData.lastUpdateTime) {
+                lastUpdatedEl.textContent = `Last updated: ${liveData.lastUpdateTime}`;
+            }
+        }
+
+        // Render chart
+        function renderChart(chartData) {
+            Plotly.newPlot('stockChart', chartData.data, chartData.layout);
+        }
+
+        // Fetch suggestions from API
+        function fetchSuggestions() {
+            fetch('/api/suggestions')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.suggestions && data.suggestions.length) {
+                        const suggestionsContainer = document.getElementById('suggestions');
+                        suggestionsContainer.innerHTML = '';
+                        
+                        data.suggestions.forEach(suggestion => {
+                            const button = document.createElement('button');
+                            button.classList.add('list-group-item', 'list-group-item-action', 'bg-dark', 'text-white', 'suggestion');
+                            button.textContent = suggestion;
+                            button.addEventListener('click', function() {
+                                const message = this.textContent;
+                                document.getElementById('userInput').value = message;
+                                addMessage(message, 'user');
+                                sendMessageToAPI(message);
+                            });
+                            
+                            suggestionsContainer.appendChild(button);
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching suggestions:', error);
+                });
+        }
+    </script>
+</body>
+</html> 

@@ -276,9 +276,12 @@ def get_base_price(symbol):
     """Get a reasonable base price for a stock based on its name"""
     # Set realistic base prices for known stocks
     price_map = {
+        # Indices
         "NIFTY": 22000,
         "SENSEX": 72000,
         "BANKNIFTY": 46000,
+        
+        # Large Cap Listed Companies
         "RELIANCE": 2400,
         "TCS": 3700,
         "HDFCBANK": 1650,
@@ -313,6 +316,57 @@ def get_base_price(symbol):
         "HEROMOTOCO": 4500,
         "JSWSTEEL": 880,
         "APOLLOHOSP": 5700,
+        
+        # Mid & Small Cap Stocks
+        "ZOMATO": 185,
+        "PAYTM": 450,
+        "POLICYBZR": 760,
+        "NYKAA": 178,
+        "DMART": 4400,
+        "IRCTC": 900,
+        "DEEPAKNTR": 2200,
+        "LICI": 950,
+        "HAVELLS": 1520,
+        "TATAPOWER": 390,
+        "JUBLFOOD": 580,
+        "INDIGO": 3800,
+        "PNB": 85,
+        "BANKBARODA": 240,
+        "ABFRL": 320,
+        "IDEA": 15,
+        "MOTHERSON": 110,
+        "FINEORG": 4800,
+        "AFFLE": 1050,
+        "LALPATHLAB": 3400,
+        "TRENT": 4200,
+        "HAPPSTMNDS": 820,
+        "GLAXO": 1900,
+        
+        # Unlisted Companies (Hypothetical values if they were listed)
+        "SWIGGY": 1250,  # Food delivery giant
+        "OLA": 980,      # Ride-hailing platform
+        "BYJU": 680,     # EdTech giant, recently facing challenges
+        "ZERODHA": 3400, # Profitable discount broker
+        "CRED": 1180,    # Fintech unicorn
+        "MEESHO": 720,   # E-commerce platform
+        "RAZORPAY": 2800, # Payment gateway
+        "BHAIRAVAI": 1450, # Advanced AI company
+        "FRESHWORKS": 860, # SaaS company
+        "OLAMONEY": 640,  # Fintech service
+        "ISHA": 940,      # Foundation entity
+        "JIOMART": 1650,  # E-commerce platform
+        "DREAM11": 2250,  # Fantasy sports platform
+        "UNACADEMY": 580, # EdTech platform
+        "LENSKART": 1200, # Eyewear retailer
+        "PHARMEASY": 530, # Online pharmacy
+        "SNAPDEAL": 320,  # E-commerce platform
+        "BIGBASKET": 1100, # Online grocery
+        "UPSTOX": 1450,   # Discount broker
+        "GROWW": 1680,    # Investment platform
+        "UDAAN": 880,     # B2B e-commerce
+        "DAILYHUNT": 750, # Content aggregator
+        "SHARECHAT": 540, # Social media platform
+        "DUNZO": 420      # Quick commerce
     }
     
     # Return known price or generate a reasonable one based on symbol characteristics
@@ -699,8 +753,7 @@ def fetch_news_for_stock(symbol, count=5):
             # Generate date (more recent for higher indices - fresher news first)
             date = (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d")
             
-            # Generate realistic URL that would actually work to redirect to real sources
-            # Create slugified headline for URL
+            # Generate slugified headline for URL
             slug = headline.lower()
             # Remove special characters and replace spaces with hyphens
             slug = ''.join(c if c.isalnum() or c.isspace() else '' for c in slug)
@@ -713,7 +766,7 @@ def fetch_news_for_stock(symbol, count=5):
             
             # Create final URL with proper domain and path structure
             if source["name"] == "Economic Times":
-                url = f"https://{source['domain']}/{source['path']}/{slug}-{article_id}.cms"
+                url = f"https://www.{source['domain']}/{source['path']}/{slug}-{article_id}.cms"
             elif source["name"] == "Money Control":
                 url = f"https://www.{source['domain']}/{source['path']}/{slug}-{article_id}.html"
             elif source["name"] == "Live Mint":
@@ -729,7 +782,7 @@ def fetch_news_for_stock(symbol, count=5):
                 "content": content,
                 "url": url,
                 "sentiment": sentiment,
-                "redirect_url": f"https://{source['domain']}"  # Base URL for redirection
+                "redirect_url": f"https://www.{source['domain']}"  # Fixed URL with www and https
             })
         
         # Cache results
@@ -760,9 +813,9 @@ def fetch_news_for_stock(symbol, count=5):
                 "source": source_name,
                 "date": (datetime.now() - timedelta(days=i)).strftime("%Y-%m-%d"),
                 "content": f"Market experts are monitoring {symbol} closely as the stock shows {sentiment} trends. This comes amid broader market movements influenced by recent economic data and corporate announcements.",
-                "url": f"https://{domain}/markets/stocks/{symbol.lower()}-{random.randint(10000, 99999)}",
+                "url": f"https://www.{domain}/markets/stocks/{symbol.lower()}-{random.randint(10000, 99999)}",
                 "sentiment": sentiment,
-                "redirect_url": f"https://{domain}"
+                "redirect_url": f"https://www.{domain}"
             })
         
         return fallback_news 
